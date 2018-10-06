@@ -3,3 +3,5 @@ fn main() {
 }
 
 pub mod cpu;
+pub mod graphics;
+pub mod keypad;
