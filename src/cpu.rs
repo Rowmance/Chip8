@@ -5,41 +5,41 @@ use rand::prelude::random;
 /// Represents the CPU
 struct Cpu {
     /// Index register
-    pub i: u16,
+    i: u16,
 
     /// The program counter
-    pub pc: u16,
+    pc: u16,
 
     /// The memory (4KB).
     ///
     /// `0x000` through to `0x200` is reserved. Most programs start at
     /// `0x200` though some start at `0x600`.
-    pub memory: [u8; 4096],
+    memory: [u8; 4096],
 
     /// Registers
-    pub v: [u8; 16],
+    v: [u8; 16],
 
     /// The stack
-    pub stack: [u16; 16],
+    stack: [u16; 16],
 
     /// The stack pointer.
-    pub sp: u8,
+    sp: u8,
 
     /// The delay timer.
     ///
     /// Counts down one on every cycle.
-    pub dt: u8,
+    dt: u8,
 
     /// The sound timer.
     ///
     /// Counts down one on every cycle and plays a sound whilst >0.
-    pub st: u8,
+    st: u8,
 
     /// The graphics/video
-    pub graphics: Graphics,
+    graphics: Graphics,
 
     /// The keypad
-    pub keypad: Keypad,
+    keypad: Keypad,
 }
 
 impl Cpu {
@@ -242,7 +242,10 @@ impl Cpu {
     /// Display n-byte sprite starting at memory location I at (Vx, Vy).
     /// Set Vf = 1 if any pixels were erased.
     fn drw(&mut self, x: u8, y: u8, n: u8) {
-        // TODO
+        let bytes = (0..n as usize)
+            .map(|i| self.memory[self.i as usize + i])
+            .collect::<Vec<u8>>();
+        self.graphics.draw(x, y, bytes);
         self.pc += 1;
     }
 
@@ -291,25 +294,34 @@ impl Cpu {
 
     /// Set I = location of sprite for digit Vx
     fn ld_sprite(&mut self, x: u8) {
-        // TODO
+        self.i = x as u16 * 5;
         self.pc += 1;
     }
 
     /// Store BCD representation of Vx in memory locations I, I+1 and I+2
+    /// Puts the 100s digit in I, the 10s in I+1 and the 1s in I+2.
     fn ld_bcd(&mut self, x: u8) {
-        // TODO
+        let dec = self.v[x];
+        let index = self.i as usize;
+        self.memory[index] = dec / 100;
+        self.memory[index + 1] = (dec / 10) % 10;
+        self.memory[index + 2] = dec % 100;
         self.pc += 1;
     }
 
     /// Store registers V0 through Vx to memory starting at location I
     fn ld_set_memory(&mut self, x: u8) {
-        // TODO
+        for i in 0..x {
+            self.memory[self.i + i] = self.v[i];
+        }
         self.pc += 1;
     }
 
     /// Read registers V0 through to Vx from memory starting at location I
     fn ld_get_memory(&mut self, x: u8) {
-        // TODO
+        for i in 0..x {
+            self.v[i] = self.memory[i + self.i];
+        }
         self.pc += 1;
     }
 }
