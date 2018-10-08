@@ -4,3 +4,5 @@ version = "0.1.0"
 authors = ["Roman Kolacz <roman@kolacz.io>"]
 
 [dependencies]
+rand = "0.5"
+sdl2 = "0.31.0"

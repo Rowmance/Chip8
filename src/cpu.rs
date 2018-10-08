@@ -1,5 +1,6 @@
 use graphics::Graphics;
 use keypad::Keypad;
+use rand::prelude::random;
 
 /// Represents the CPU
 struct Cpu {
@@ -36,7 +37,6 @@ struct Cpu {
 
     /// The graphics/video
     pub graphics: Graphics,
-
 
     /// The keypad
     pub keypad: Keypad,
@@ -234,7 +234,7 @@ impl Cpu {
 
     /// Set Vx = random byte & kk
     fn rnd(&mut self, x: u8, kk: u8) {
-        let rand = 0x77; // TODO
+        let rand: u8 = random();
         self.v[x as usize] = rand & kk;
         self.pc += 1;
     }
@@ -264,8 +264,11 @@ impl Cpu {
 
     /// Wait for a key press, store the value of the key in Vx
     fn ld_key(&mut self, x: u8) {
-        // TODO.
-        self.pc += 1;
+        if let Some(key) = self.keypad.keys.iter().position(|key| *key) {
+            self.pc += 1;
+            self.v[x as usize] = key as u8;
+        }
+        // Spin otherwise, don't increment pc
     }
 
     /// Set delay timer = Vx

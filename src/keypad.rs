@@ -1,3 +1,9 @@
+extern crate sdl2;
+
+use sdl2::event::Event;
+use sdl2::keyboard::Keycode;
+
+#[derive(Default, Debug)]
 pub struct Keypad {
     /// The state of the 16 keys.
     ///
@@ -13,7 +19,26 @@ pub struct Keypad {
 }
 
 impl Keypad {
+
+    /// Returns true if the given key index is pressed.
     pub fn is_key_pressed(&self, key: u8) -> bool {
         self.keys[key as usize]
     }
+
+    /// Sets the given key index to the given state.
+    pub fn set_key(&mut self, key: u8, state: bool) {
+        self.keys[key as usize] = state;
+    }
+
+    /// Maps the given pressed keyboard-key to an index
+    pub fn map_key(&mut self, key: Keycode, state: bool) {
+        // TODO
+        match key {
+            _ => ()
+        }
+    }
 }
+
+
+
+// TODO test these
