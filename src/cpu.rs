@@ -136,7 +136,7 @@ impl Cpu {
             (0x0F, _, 0x03, 0x03) => self.ld_bcd(x),
             (0x0F, _, 0x05, 0x05) => self.ld_set_memory(x),
             (0x0F, _, 0x06, 0x05) => self.ld_get_memory(x),
-            (_, _, _, _) => () // noop
+            (_, _, _, _) => self.noop()
         }
     }
 
@@ -284,6 +284,7 @@ impl Cpu {
     /// Display n-byte sprite starting at memory location I at (Vx, Vy).
     /// Set Vf = 1 if any pixels were erased.
     fn drw(&mut self, x: u8, y: u8, n: u8) {
+        // TODO is this working correctly?
         let bytes = (0..n as usize)
             .map(|i| self.memory[self.i as usize + i])
             .collect::<Vec<u8>>();
@@ -329,14 +330,18 @@ impl Cpu {
     }
 
     /// Set I = I + Vx
+    /// Set Vf = 1 if the result is greater than 0xFFF
     fn add_i_vx(&mut self, x: u8) {
         self.i += self.v[x as usize] as u16;
+        // this carry is undocumented
+        // TODO does this work?
+        self.v[0xF] = if self.i > 0xFFF { 1 } else { 0 };
         self.pc += 2;
     }
 
     /// Set I = location of sprite for digit Vx
     fn ld_sprite(&mut self, x: u8) {
-        self.i = x as u16 * 5;
+        self.i = self.v[x as usize] as u16 * 5;
         self.pc += 2;
     }
 
@@ -346,8 +351,8 @@ impl Cpu {
         let dec = self.v[x as usize];
         let index = self.i as usize;
         self.memory[index] = dec / 100;
-        self.memory[index + 1] = (dec / 10) % 10;
-        self.memory[index + 2] = dec % 100;
+        self.memory[index + 1] = (dec % 100) / 10;
+        self.memory[index + 2] = dec % 10;
         self.pc += 2;
     }
 
@@ -364,6 +369,11 @@ impl Cpu {
         for i in 0..x {
             self.v[i as usize] = self.memory[i as usize + self.i as usize];
         }
+        self.pc += 2;
+    }
+
+    /// No-op
+    fn noop(&mut self) {
         self.pc += 2;
     }
 }

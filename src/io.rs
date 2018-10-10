@@ -9,7 +9,7 @@ use sdl2::render::Canvas;
 use sdl2::video::Window;
 use cpu::Cpu;
 
-const SCALE: u32 = 2;
+const SCALE: u32 = 4;
 
 pub struct Display {
     canvas: Canvas<Window>,

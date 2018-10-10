@@ -44,8 +44,11 @@ impl Graphics {
 
     /// Clears the screen and VRAM
     pub fn clear(&mut self) {
-        info!("CLEAR CALLED");
-        self.memory = [false; (WIDTH * HEIGHT) as usize];
+        for y in 0..HEIGHT {
+            for x in 0..WIDTH {
+                self.memory[y as usize * WIDTH as usize + x as usize] = false;
+            }
+        }
     }
 
     /// Stores the given bytes into the given location in memory.
