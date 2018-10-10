@@ -19,6 +19,11 @@ pub struct Keypad {
 }
 
 impl Keypad {
+    pub fn new() -> Self {
+        Keypad {
+            keys: [false; 16],
+        }
+    }
 
     /// Returns true if the given key index is pressed.
     pub fn is_key_pressed(&self, key: u8) -> bool {
@@ -38,7 +43,6 @@ impl Keypad {
         }
     }
 }
-
 
 
 // TODO test these
