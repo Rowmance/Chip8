@@ -14,6 +14,23 @@ pub struct Graphics {
     pub memory: [bool; (WIDTH * HEIGHT) as usize],
 }
 
+impl Graphics {
+    /// Toggles the value of the given pixel, and returns
+    /// true if the pixel was already set. Resets the pixel
+    /// if it's set twice.
+    pub fn draw_pixel(&mut self, x: u8, y: u8, state: bool) -> bool {
+        let index = (y as usize % HEIGHT as usize) * WIDTH as usize + (x as usize % WIDTH as usize);
+        self.memory[index] ^= state;
+        return state && !self.memory[index];
+    }
+
+    /// Sets the value of the given pixel, ignoring what's already there.
+    pub fn set_pixel(&mut self, x: u8, y: u8, state: bool) {
+        let index = (y as usize % HEIGHT as usize) * WIDTH as usize + (x as usize % WIDTH as usize);
+        self.memory[index] = state;
+    }
+}
+
 impl Display for Graphics {
     fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
         let mut str = String::new();
@@ -22,13 +39,10 @@ impl Display for Graphics {
             for x in 0..WIDTH {
                 let index = y as usize * WIDTH as usize + x as usize;
                 let bit = self.memory[index];
-                if bit {
-                    info!("TRUE FOUND AT {}", index);
-                }
                 let strbit = if bit { "X" } else { "O" };
                 str.push_str(strbit.as_ref());
             }
-            str.push_str("\n")
+            str.push_str("\n");
         }
         write!(f, "{}", str)
     }
@@ -46,7 +60,7 @@ impl Graphics {
     pub fn clear(&mut self) {
         for y in 0..HEIGHT {
             for x in 0..WIDTH {
-                self.memory[y as usize * WIDTH as usize + x as usize] = false;
+                self.set_pixel(x as u8, y as u8, false);
             }
         }
     }
@@ -59,15 +73,7 @@ impl Graphics {
         for yy in 0..bytes.len() {
             for xx in 0..8 {
                 let bit = ((bytes[yy] >> xx) & 0b1) != 0;
-                let index: usize = WIDTH as usize * (y as usize + yy) + (x as usize + xx as usize);
-                let curr = self.memory[index];
-                self.memory[index] = bit ^ curr;
-                if bit ^ curr {
-                    info!("true was set at {}", index);
-                }
-                if bit && curr {
-                    collision = true;
-                }
+                collision |= self.draw_pixel(x + 7 - xx, y + yy as u8, bit);
             }
         }
         collision

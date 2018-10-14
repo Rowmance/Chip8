@@ -40,18 +40,22 @@ pub struct Cpu {
     pub graphics: Graphics,
 
     /// The keypad
-    keypad: Keypad,
+    pub keypad: Keypad,
 }
 
 impl Cpu {
     /// Returns a new CPU instance
     pub fn new() -> Self {
-        info!("Creating new CPU");
+        let mut initial_memory = [0; 4096];
+        for i in 0..FONT_SET.len() {
+            initial_memory[i] = FONT_SET[i];
+        }
+
         Cpu {
             i: 0,
             pc: 0x200,
 
-            memory: [0; 4096],
+            memory: initial_memory,
             v: [0; 16],
             stack: [0; 16],
             sp: 0,
@@ -66,6 +70,7 @@ impl Cpu {
     pub fn load_rom(&mut self, rom: &[u8]) {
         // ROMs are loaded into memory from 0x200
         for x in 0..rom.len() {
+            info!("loading byte {:X} into {:X}", rom[x], 0x200 + x);
             self.memory[0x200 + x] = rom[x];
         }
     }
@@ -73,7 +78,7 @@ impl Cpu {
     pub fn execute_cycle(&mut self) {
         // each opcode is two bytes, and so needs to be combined from
         // two successive pc locations
-        let part1 = (self.memory[self.pc as usize] as u16);
+        let part1 = self.memory[self.pc as usize] as u16;
         let part2 = self.memory[self.pc as usize + 1] as u16;
         let opcode = (part1 << 8) | part2;
         self.execute_opcode(opcode);
@@ -86,7 +91,6 @@ impl Cpu {
     ///
     /// All instructions are 2 bytes long
     fn execute_opcode(&mut self, opcode: u16) {
-//        info!("Executing op code: 0x{:X}", opcode);
         // split the op-code up to make the matching logic saner
         let nibbles = (
             (opcode & 0xF000) >> 12 as u8,
@@ -284,11 +288,13 @@ impl Cpu {
     /// Display n-byte sprite starting at memory location I at (Vx, Vy).
     /// Set Vf = 1 if any pixels were erased.
     fn drw(&mut self, x: u8, y: u8, n: u8) {
-        // TODO is this working correctly?
+        let vx = self.v[x as usize];
+        let vy = self.v[y as usize];
         let bytes = (0..n as usize)
             .map(|i| self.memory[self.i as usize + i])
             .collect::<Vec<u8>>();
-        self.graphics.draw(x, y, bytes);
+        let collision = self.graphics.draw(vx, vy, bytes);
+        self.v[0xF] = if collision { 1 } else { 0 };
         self.pc += 2;
     }
 
@@ -333,8 +339,6 @@ impl Cpu {
     /// Set Vf = 1 if the result is greater than 0xFFF
     fn add_i_vx(&mut self, x: u8) {
         self.i += self.v[x as usize] as u16;
-        // this carry is undocumented
-        // TODO does this work?
         self.v[0xF] = if self.i > 0xFFF { 1 } else { 0 };
         self.pc += 2;
     }
@@ -358,7 +362,7 @@ impl Cpu {
 
     /// Store registers V0 through Vx to memory starting at location I
     fn ld_set_memory(&mut self, x: u8) {
-        for i in 0..x {
+        for i in 0..=x {
             self.memory[self.i as usize + i as usize] = self.v[i as usize];
         }
         self.pc += 2;
@@ -366,7 +370,7 @@ impl Cpu {
 
     /// Read registers V0 through to Vx from memory starting at location I
     fn ld_get_memory(&mut self, x: u8) {
-        for i in 0..x {
+        for i in 0..=x {
             self.v[i as usize] = self.memory[i as usize + self.i as usize];
         }
         self.pc += 2;

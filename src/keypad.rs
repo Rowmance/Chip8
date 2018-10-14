@@ -25,6 +25,12 @@ impl Keypad {
         }
     }
 
+    pub fn clear(&mut self) {
+        for i in 0..0xF {
+            self.keys[i] = false;
+        }
+    }
+
     /// Returns true if the given key index is pressed.
     pub fn is_key_pressed(&self, key: u8) -> bool {
         self.keys[key as usize]
@@ -36,9 +42,27 @@ impl Keypad {
     }
 
     /// Maps the given pressed keyboard-key to an index
-    pub fn map_key(&mut self, key: Keycode, state: bool) {
-        // TODO
+    pub fn set_from_keycode(&mut self, key: Keycode, state: bool) {
         match key {
+            Keycode::Num1 => self.keys[0x1 as usize] = state,
+            Keycode::Num2 => self.keys[0x2 as usize] = state,
+            Keycode::Num3 => self.keys[0x3 as usize] = state,
+            Keycode::Num4 => self.keys[0xC as usize] = state,
+
+            Keycode::Quote => self.keys[0x4 as usize] = state,
+            Keycode::Comma => self.keys[0x5 as usize] = state,
+            Keycode::Period => self.keys[0x6 as usize] = state,
+            Keycode::P => self.keys[0xD as usize] = state,
+
+            Keycode::A => self.keys[0x7 as usize] = state,
+            Keycode::O => self.keys[0x8 as usize] = state,
+            Keycode::E => self.keys[0x9 as usize] = state,
+            Keycode::U => self.keys[0xE as usize] = state,
+
+            Keycode::Semicolon => self.keys[0xA as usize] = state,
+            Keycode::Q => self.keys[0x0 as usize] = state,
+            Keycode::J => self.keys[0xB as usize] = state,
+            Keycode::K => self.keys[0xF as usize] = state,
             _ => ()
         }
     }
