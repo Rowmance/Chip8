@@ -107,7 +107,7 @@ fn main() {
     let sdl_context = sdl2::init().unwrap();
 
     let mut cpu = Cpu::new();
-    cpu.load_rom(TEST2.as_ref());
+    cpu.load_rom(PONG2.as_ref());
     let mut display = Display::new(&sdl_context);
 
 // TODO pull this out.
@@ -133,6 +133,8 @@ fn main() {
 
         cpu.execute_cycle();
         display.render(&cpu);
+        // TODO should run at 500Hz and timers should be at 60Hz
+        // TODO beep timer
 //        ::std::thread::sleep_ms(100);
     }
 }
