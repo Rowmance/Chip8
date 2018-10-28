@@ -1,7 +1,7 @@
-extern crate sdl2;
+//extern crate sdl2;
 
-use sdl2::event::Event;
-use sdl2::keyboard::Keycode;
+//use sdl2::event::Event;
+//use sdl2::keyboard::Keycode;
 
 #[derive(Default, Debug)]
 pub struct Keypad {
@@ -42,29 +42,29 @@ impl Keypad {
     }
 
     /// Maps the given pressed keyboard-key to an index
-    pub fn set_from_keycode(&mut self, key: Keycode, state: bool) {
-        match key {
-            Keycode::Num1 => self.keys[0x1 as usize] = state,
-            Keycode::Num2 => self.keys[0x2 as usize] = state,
-            Keycode::Num3 => self.keys[0x3 as usize] = state,
-            Keycode::Num4 => self.keys[0xC as usize] = state,
-
-            Keycode::Quote => self.keys[0x4 as usize] = state,
-            Keycode::Comma => self.keys[0x5 as usize] = state,
-            Keycode::Period => self.keys[0x6 as usize] = state,
-            Keycode::P => self.keys[0xD as usize] = state,
-
-            Keycode::A => self.keys[0x7 as usize] = state,
-            Keycode::O => self.keys[0x8 as usize] = state,
-            Keycode::E => self.keys[0x9 as usize] = state,
-            Keycode::U => self.keys[0xE as usize] = state,
-
-            Keycode::Semicolon => self.keys[0xA as usize] = state,
-            Keycode::Q => self.keys[0x0 as usize] = state,
-            Keycode::J => self.keys[0xB as usize] = state,
-            Keycode::K => self.keys[0xF as usize] = state,
-            _ => ()
-        }
+    pub fn set_from_keycode(&mut self,/* key: Keycode*/ state: bool) {
+//        match key {
+//            Keycode::Num1 => self.keys[0x1 as usize] = state,
+//            Keycode::Num2 => self.keys[0x2 as usize] = state,
+//            Keycode::Num3 => self.keys[0x3 as usize] = state,
+//            Keycode::Num4 => self.keys[0xC as usize] = state,
+//
+//            Keycode::Quote => self.keys[0x4 as usize] = state,
+//            Keycode::Comma => self.keys[0x5 as usize] = state,
+//            Keycode::Period => self.keys[0x6 as usize] = state,
+//            Keycode::P => self.keys[0xD as usize] = state,
+//
+//            Keycode::A => self.keys[0x7 as usize] = state,
+//            Keycode::O => self.keys[0x8 as usize] = state,
+//            Keycode::E => self.keys[0x9 as usize] = state,
+//            Keycode::U => self.keys[0xE as usize] = state,
+//
+//            Keycode::Semicolon => self.keys[0xA as usize] = state,
+//            Keycode::Q => self.keys[0x0 as usize] = state,
+//            Keycode::J => self.keys[0xB as usize] = state,
+//            Keycode::K => self.keys[0xF as usize] = state,
+//            _ => ()
+//        }
     }
 }
 
