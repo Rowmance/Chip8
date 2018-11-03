@@ -5,6 +5,7 @@ use std::fmt::Error;
 pub const HEIGHT: u32 = 32;
 pub const WIDTH: u32 = 64;
 
+#[derive(Clone)]
 pub struct Graphics {
     /// Represents the VRAM.
     ///

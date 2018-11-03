@@ -1,46 +1,51 @@
 use graphics::Graphics;
 use keypad::Keypad;
-use rand::prelude::random;
+use rand::prng::XorShiftRng;
+use rand::RngCore;
 
+// TODO make these private if possible
 /// Represents the CPU
 pub struct Cpu {
     /// Index register
-    i: u16,
+    pub i: u16,
 
     /// The program counter
-    pc: u16,
+    pub pc: u16,
 
     // TODO maybe pull this (and the others) out and add u8/u16 indexing
     /// The memory (4KB).
     ///
     /// `0x000` through to `0x200` is reserved. Most programs start at
     /// `0x200` though some start at `0x600`.
-    memory: [u8; 4096],
+    pub memory: [u8; 4096],
 
     /// Registers
-    v: [u8; 16],
+    pub v: [u8; 16],
 
     /// The stack
-    stack: [u16; 16],
+    pub stack: [u16; 16],
 
     /// The stack pointer.
-    sp: u8,
+    pub sp: u8,
 
     /// The delay timer.
     ///
     /// Counts down one on every cycle.
-    dt: u8,
+    pub dt: u8,
 
     /// The sound timer.
     ///
     /// Counts down one on every cycle and plays a sound whilst >0.
-    st: u8,
+    pub st: u8,
 
     /// The graphics/video
     pub graphics: Graphics,
 
     /// The keypad
     pub keypad: Keypad,
+
+    // ----------
+    rand: XorShiftRng
 }
 
 impl Cpu {
@@ -63,7 +68,30 @@ impl Cpu {
             st: 0,
             keypad: Keypad::new(),
             graphics: Graphics::new(),
+            rand: XorShiftRng::new_unseeded()
         }
+    }
+
+    /// Resets the current instance
+    pub fn reset(&mut self) {
+        for i in 0..FONT_SET.len() {
+            self.memory[i] = FONT_SET[i];
+        }
+        for i in FONT_SET.len()..4096 {
+            self.memory[i] = 0;
+        }
+        self.i = 0;
+        self.pc = 0x200;
+
+        for i in 0..16 {
+            self.v[i] = 0;
+            self.stack[i] = 0;
+        }
+        self.sp = 0;
+        self.dt = 0;
+        self.st = 0;
+        self.keypad.clear();
+        self.graphics.clear();
     }
 
     /// Loads the given ROM into memory
@@ -280,7 +308,8 @@ impl Cpu {
 
     /// Set Vx = random byte & kk
     fn rnd(&mut self, x: u8, kk: u8) {
-        let rand: u8 = random();
+        let random = self.rand.next_u32();
+        let rand: u8 = (random % 256) as u8;
         self.v[x as usize] = rand & kk;
         self.pc += 2;
     }

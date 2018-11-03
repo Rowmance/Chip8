@@ -1,21 +1,29 @@
 extern crate rand;
-extern crate sdl2;
+extern crate wasm_bindgen;
+//extern crate sdl2;
 
 #[macro_use]
 extern crate log;
 extern crate env_logger;
 
+extern crate console_error_panic_hook;
+
+#[macro_use]
+extern crate lazy_static;
+
 pub mod cpu;
 pub mod graphics;
 pub mod keypad;
 pub mod io;
+pub mod wasm;
 
 use io::Display;
 use graphics::Graphics;
 use cpu::Cpu;
 use keypad::Keypad;
-use sdl2::event::Event;
-use sdl2::keyboard::Keycode;
+//use sdl2::event::Event;
+//use sdl2::keyboard::Keycode;
+use wasm_bindgen::prelude::*;
 
 const PONG: [u8; 246] = [
     0x6a, 0x02, 0x6b, 0x0c, 0x6c, 0x3f, 0x6d, 0x0c, 0xa2, 0xea, 0xda, 0xb6, 0xdc, 0xd6, 0x6e, 0x00,
@@ -102,39 +110,39 @@ const PONG2: [u8; 246] = [
     0x80, 0x00, 0x00, 0x00, 0x00, 0x00
 ];
 
-fn main() {
-    env_logger::init();
-    let sdl_context = sdl2::init().unwrap();
-
-    let mut cpu = Cpu::new();
-    cpu.load_rom(PONG2.as_ref());
-    let mut display = Display::new(&sdl_context);
-
-// TODO pull this out.
-    let mut events = sdl_context.event_pump().unwrap();
-
-    loop {
-        for event in events.poll_iter() {
-            if let Event::Quit { .. } = event {
-                return;
-            };
-        }
-
-        let keys: Vec<Keycode> = events
-            .keyboard_state()
-            .pressed_scancodes()
-            .filter_map(Keycode::from_scancode)
-            .collect();
-
-        cpu.keypad.clear();
-        for key in keys {
-            cpu.keypad.set_from_keycode(key, true);
-        }
-
-        cpu.execute_cycle();
-        display.render(&cpu);
-        // TODO should run at 500Hz and timers should be at 60Hz
-        // TODO beep timer
-//        ::std::thread::sleep_ms(100);
-    }
-}
+//fn main() {
+//    env_logger::init();
+//    let sdl_context = sdl2::init().unwrap();
+//
+//    let mut cpu = Cpu::new();
+//    cpu.load_rom(PONG2.as_ref());
+//    let mut display = Display::new(&sdl_context);
+//
+//// TODO pull this out.
+//    let mut events = sdl_context.event_pump().unwrap();
+//
+//    loop {
+//        for event in events.poll_iter() {
+//            if let Event::Quit { .. } = event {
+//                return;
+//            };
+//        }
+//
+//        let keys: Vec<Keycode> = events
+//            .keyboard_state()
+//            .pressed_scancodes()
+//            .filter_map(Keycode::from_scancode)
+//            .collect();
+//
+//        cpu.keypad.clear();
+//        for key in keys {
+//            cpu.keypad.set_from_keycode(key, true);
+//        }
+//
+//        cpu.execute_cycle();
+//        display.render(&cpu);
+//        // TODO should run at 500Hz and timers should be at 60Hz
+//        // TODO beep timer
+////        ::std::thread::sleep_ms(100);
+//    }
+//}

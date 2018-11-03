@@ -1,0 +1,126 @@
+:host {
+  display: grid;
+  max-width: 1024px;
+  margin: 0 auto;
+
+  grid-template-areas:
+    'h h h h h h h h h h h h'
+    's s s s s s s g g g g g'
+    's s s s s s s k k k k k'
+    'b b b b b b b o o o o o'
+    'i i i t t t r r p p p p';
+  // h header
+  // s screen
+  // g game select
+  // k keypad
+  // b buttons
+  // i instructions
+  // t stack
+  // r registers
+  // p breakpoints
+  // o options
+  justify-items: center;
+  align-items: center;
+  justify-content: center;
+  align-content: center;
+  grid-gap: 12px;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 20px;
+  grid-area: h;
+}
+
+.keypad {
+  grid-area: k;
+}
+
+.game-select {
+  grid-area: g;
+}
+
+.screen {
+  grid-area: s;
+}
+
+.options {
+  grid-area: o;
+}
+
+.buttons {
+  grid-area: b;
+
+  display: flex;
+  justify-content: space-evenly;
+  width: 100%;
+}
+
+.instructions {
+  grid-area: i;
+}
+
+.stack {
+  grid-area: t;
+}
+
+.registers {
+  grid-area: r;
+}
+
+.breakpoints {
+ grid-area: p;
+}
+
+.header__title {
+  font-size: 30px;
+}
+
+.header__subtitle {
+  font-size: 16px;
+}
+
+.keypad__header {
+  text-align: center;
+  padding-bottom: 6px;
+}
+
+.keypad__grid {
+  display: grid;
+  grid-template-columns: 60px 60px 60px 60px;
+  grid-template-rows: 60px 60px 60px 60px;
+  justify-items: stretch;
+  align-items: stretch;
+}
+
+.keypad__item {
+  text-align: center;
+  font-size: 16px;
+  border: 1px solid white;
+  line-height: 55px;
+}
+
+.button {
+  padding: 8px;
+  border: 1px solid white;
+  margin-right: 4px;
+  cursor: pointer;
+
+  &--selected {
+    background-color: rgba(white, 0.3);
+    cursor: default;
+  }
+
+  &--disabled {
+    color: rgba(white, 0.6);
+    cursor: not-allowed;
+  }
+
+  &:hover:not(#{&}--disabled):not(#{&}--selected) {
+    background-color: rgba(white, 0.1);
+  }
+}
+
+.button-group {
+  display: flex;
+}
