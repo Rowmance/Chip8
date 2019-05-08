@@ -45,7 +45,28 @@ pub struct Cpu {
     pub keypad: Keypad,
 
     // ----------
-    rand: XorShiftRng
+    pub last_opcode: u16,
+
+    // ----------
+    rand: XorShiftRng,
+}
+
+/// Represents the difference in state from the previous tick.
+pub struct TickChange {
+    /// The op code which executed
+    opcode: u16,
+
+    /// The new registers
+    v: [u8; 16],
+
+    /// The new stack
+    stack: [u16; 16],
+
+    /// The new sound timer
+    st: u8,
+
+    /// the new delay timer
+    dt: u8
 }
 
 impl Cpu {
@@ -68,7 +89,8 @@ impl Cpu {
             st: 0,
             keypad: Keypad::new(),
             graphics: Graphics::new(),
-            rand: XorShiftRng::new_unseeded()
+            last_opcode: 0,
+            rand: XorShiftRng::new_unseeded(),
         }
     }
 
@@ -109,6 +131,7 @@ impl Cpu {
         let part1 = self.memory[self.pc as usize] as u16;
         let part2 = self.memory[self.pc as usize + 1] as u16;
         let opcode = (part1 << 8) | part2;
+        self.last_opcode = opcode;
         self.execute_opcode(opcode);
         if self.dt > 0 { self.dt -= 1 };
         if self.st > 0 { self.st -= 1 };

@@ -1,0 +1,3 @@
+- Makefile maybe?
+- yarn for dependencies, wasm-pack build -d web
+

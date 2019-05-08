@@ -1,6 +1,5 @@
 extern crate rand;
 extern crate wasm_bindgen;
-//extern crate sdl2;
 
 #[macro_use]
 extern crate log;
@@ -21,9 +20,11 @@ use io::Display;
 use graphics::Graphics;
 use cpu::Cpu;
 use keypad::Keypad;
-//use sdl2::event::Event;
-//use sdl2::keyboard::Keycode;
 use wasm_bindgen::prelude::*;
+
+#[cfg(feature = "wee_alloc")]
+#[global_allocator]
+static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
 const PONG: [u8; 246] = [
     0x6a, 0x02, 0x6b, 0x0c, 0x6c, 0x3f, 0x6d, 0x0c, 0xa2, 0xea, 0xda, 0xb6, 0xdc, 0xd6, 0x6e, 0x00,

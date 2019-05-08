@@ -1,4 +1,11 @@
-:host {
+/* You can add global styles to this file, and also import other style files */
+@import url("https://fonts.googleapis.com/css?family=Source+Code+Pro:600");
+
+body {
+  background-color: #222222;
+  color: white;
+  font-family: "Source Code Pro", monospace;
+
   display: grid;
   max-width: 1024px;
   margin: 0 auto;
@@ -9,16 +16,18 @@
     's s s s s s s k k k k k'
     'b b b b b b b o o o o o'
     'i i i t t t r r p p p p';
-  // h header
-  // s screen
-  // g game select
-  // k keypad
-  // b buttons
-  // i instructions
-  // t stack
-  // r registers
-  // p breakpoints
-  // o options
+  /*
+  h header
+  s screen
+  g game select
+  k keypad
+  b buttons
+  i instructions
+  t stack
+  r registers
+  p breakpoints
+  o options
+  */
   justify-items: center;
   align-items: center;
   justify-content: center;
@@ -42,6 +51,7 @@
 
 .screen {
   grid-area: s;
+    width: 640px;
 }
 
 .options {
@@ -50,7 +60,6 @@
 
 .buttons {
   grid-area: b;
-
   display: flex;
   justify-content: space-evenly;
   width: 100%;
@@ -69,7 +78,7 @@
 }
 
 .breakpoints {
- grid-area: p;
+  grid-area: p;
 }
 
 .header__title {
@@ -105,20 +114,17 @@
   border: 1px solid white;
   margin-right: 4px;
   cursor: pointer;
-
-  &--selected {
-    background-color: rgba(white, 0.3);
-    cursor: default;
-  }
-
-  &--disabled {
-    color: rgba(white, 0.6);
-    cursor: not-allowed;
-  }
-
-  &:hover:not(#{&}--disabled):not(#{&}--selected) {
-    background-color: rgba(white, 0.1);
-  }
+}
+.button--selected {
+  background-color: rgba(255, 255, 255, 0.3);
+  cursor: default;
+}
+.button--disabled {
+  color: rgba(255, 255, 255, 0.6);
+  cursor: not-allowed;
+}
+.button:hover:not(.button--disabled):not(.button--selected) {
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 .button-group {

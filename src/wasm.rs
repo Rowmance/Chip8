@@ -48,12 +48,12 @@ const PONG2: [u8; 246] = [
 
 const SCALE: u32 = 10;
 
-struct Wasm {
+struct WasmContext {
     pub cpu: Cpu,
     pub previous_graphics: Graphics,
 }
 
-impl Wasm {
+impl WasmContext {
     pub fn new() -> Self {
         let cpu = Cpu::new();
         let prev_graphics = cpu.graphics.clone();
@@ -75,7 +75,7 @@ impl Wasm {
         context.set_fill_style(&JsValue::from_str("black"));
         context.fill_rect(0.0, 0.0, graphics::WIDTH as f64 * SCALE as f64, graphics::HEIGHT as f64 * SCALE as f64);
 
-        Wasm {
+        WasmContext {
             cpu,
             previous_graphics: prev_graphics,
         }
@@ -115,33 +115,52 @@ impl Wasm {
 }
 
 lazy_static! {
-    static ref WASM: Mutex<Wasm> = {
-        Mutex::new(Wasm::new())
+    static ref WASM: Mutex<WasmContext> = {
+        Mutex::new(WasmContext::new())
     };
 }
+
+pub fn set_panic_hook() {
+    // When the `console_error_panic_hook` feature is enabled, we can call the
+    // `set_panic_hook` function at least once during initialization, and then
+    // we will get better error messages if our code ever panics.
+    //
+    // For more details see
+    // https://github.com/rustwasm/console_error_panic_hook#readme
+    #[cfg(feature = "console_error_panic_hook")]
+        console_error_panic_hook::set_once();
+}
+
 
 #[wasm_bindgen]
 pub fn main() {
     // Make JS console output Rust panics
-    panic::set_hook(Box::new(console_error_panic_hook::hook));
+    set_panic_hook();
     unsafe {
         let mut wasm = WASM.lock().unwrap();
         wasm.load_rom(&PONG2);
     }
 }
 
-struct Tick<'a> {
-    op_code: u16,
-    instruction_name: &'a str,
-
+#[wasm_bindgen]
+pub struct Tick {
+    pub op_code: u16,
 }
 
 #[wasm_bindgen]
-pub fn tick() {
+pub fn tick() -> Tick {
     unsafe {
         let mut wasm = WASM.lock().unwrap();
         wasm.cpu.execute_cycle();
 //        web_sys::console::log_1(&JsValue::from_f64(wasm.cpu.pc as f64));
         wasm.draw();
+        Tick {
+            op_code: wasm.cpu.last_opcode
+        }
     }
+}
+
+#[wasm_bindgen]
+pub fn add(a: u32, b: u32) -> u32 {
+    a + b
 }
