@@ -7,8 +7,6 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <script src="./bootstrap.js"></script>
-
   <div class="header">
     <div class="header__title">Chip8 Emulator</div>
     <div class="header__subtitle">
@@ -55,47 +53,46 @@
     <div class="button-group">
       <div
           class="button"
-          [class.button--disabled]="paused"
-          (click)="onPause()"
+          id="btn-pause"
       >
         Pause
       </div>
       <div
-          class="button"
-          [class.button--disabled]="!paused"
-          (click)="onResume()"
+          class="button button--disabled"
+          id="btn-resume"
       >
         Resume
       </div>
-      <div class="button" [class.button--disabled]="!paused" (click)="onStep()">Step</div>
+      <div
+          id="btn-step"
+          class="button button--disabled"
+      >
+        Step
+      </div>
     </div>
 
     <div class="button-group">
       <div
           class="button"
-          [class.button--selected]="speed === 0.5"
-          (click)="setSpeed(0.5)"
+          id="btn-speed0"
       >
         0.5x
       </div>
       <div
-          class="button"
-          [class.button--selected]="speed === 1"
-          (click)="setSpeed(1)"
+          class="button button--selected"
+          id="btn-speed1"
       >
         1x
       </div>
       <div
           class="button"
-          [class.button--selected]="speed === 2"
-          (click)="setSpeed(2)"
+          id="btn-speed2"
       >
         2x
       </div>
       <div
           class="button"
-          [class.button--selected]="speed === 4"
-          (click)="setSpeed(4)"
+          id="btn-speed3"
       >
         4x
       </div>
@@ -107,8 +104,19 @@
   </div>
 
   <div class="instructions">
-    0x0000 CLS (clickable to pause and get state)
+    <table id="instruction-table">
+      <tr>
+        <th>Op Code</th>
+        <th>Description</th>
+        <th>X</th>
+        <th>Y</th>
+        <th>N</th>
+        <th>KK</th>
+        <th>ADDR</th>
+      </tr>
+    </table>
   </div>
+  <!--  TODO: clickable to pause and get state at a given instruction?-->
 
   <div class="stack">
     V0; 0x67
@@ -119,9 +127,12 @@
   </div>
 
   <div class="breakpoints">
-    (Instruction) 0x0000: Enabled
-    (Memory) 0x200 (Disabled)
+<!--    (Instruction) 0x0000: Enabled-->
+<!--    (Memory) 0x200 (Disabled)-->
   </div>
 
 </body>
 </html>
+
+<!--TODO add FPS counter and free-fps button-->
+<!--https://rustwasm.github.io/docs/book/game-of-life/interactivity.html-->

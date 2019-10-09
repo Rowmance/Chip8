@@ -19,10 +19,10 @@ pub struct Cpu {
     /// `0x200` though some start at `0x600`.
     pub memory: [u8; 4096],
 
-    /// Registers
+    /// Registers.
     pub v: [u8; 16],
 
-    /// The stack
+    /// The stack.
     pub stack: [u16; 16],
 
     /// The stack pointer.
@@ -38,16 +38,18 @@ pub struct Cpu {
     /// Counts down one on every cycle and plays a sound whilst >0.
     pub st: u8,
 
-    /// The graphics/video
+    /// The graphics/video.
     pub graphics: Graphics,
 
-    /// The keypad
+    /// The keypad.
     pub keypad: Keypad,
 
     // ----------
+    /// The last executed operation, used in the debugger.
     pub last_opcode: u16,
 
     // ----------
+    /// Random number generator.
     rand: XorShiftRng,
 }
 
@@ -66,7 +68,7 @@ pub struct TickChange {
     st: u8,
 
     /// the new delay timer
-    dt: u8
+    dt: u8,
 }
 
 impl Cpu {
@@ -439,11 +441,11 @@ impl Cpu {
 ///
 /// Each letter is represented by 5 bytes (or 8x5 pixels) of pixels
 /// set. For example, the representation for '5' is:
-/// ```
+/// ```text
 ///   0xF0, 0x80, 0xF0, 0x10, 0xF0
 /// ```
 /// The binary representation of these values makes up the letter:
-/// ```
+/// ```text
 /// Hex   Bin        Bin 1s
 /// 0xF0  1111 0000  ****
 /// 0x80  1000 0000  *

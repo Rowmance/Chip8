@@ -143,8 +143,25 @@ pub fn main() {
 }
 
 #[wasm_bindgen]
+/// Represents a CPU tick and the state of the CPU after it.
 pub struct Tick {
+    /// The op code.
     pub op_code: u16,
+
+    /// The index register.
+    pub i: u16,
+
+    /// The program counter.
+    pub pc: u16,
+
+    /// Registers.
+    pub v: [u8; 16],
+
+    /// The stack.
+    pub stack: [u16; 16],
+
+    /// The stack pointer.
+    pub sp: u8,
 }
 
 #[wasm_bindgen]
@@ -155,7 +172,12 @@ pub fn tick() -> Tick {
 //        web_sys::console::log_1(&JsValue::from_f64(wasm.cpu.pc as f64));
         wasm.draw();
         Tick {
-            op_code: wasm.cpu.last_opcode
+            op_code: wasm.cpu.last_opcode,
+            i: wasm.cpu.i,
+            pc: wasm.cpu.pc,
+            v: wasm.cpu.v,
+            stack: wasm.cpu.stack,
+            sp: wasm.cpu.sp,
         }
     }
 }
