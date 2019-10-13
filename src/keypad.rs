@@ -37,7 +37,7 @@ impl Keypad {
     }
 
     pub fn clear(&mut self) {
-        for i in 0..0xF {
+        for i in 0..self.keys.len() {
             self.keys[i] = false;
         }
     }
