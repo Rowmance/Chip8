@@ -1,58 +1,60 @@
-extern crate sdl2;
-
-use graphics::Graphics;
-use graphics;
+use crate::gpu;
+use crate::gpu::Gpu;
 use sdl2::pixels::Color;
-use sdl2::rect::Point;
-use std::time::Duration;
+use sdl2::rect::Rect;
 use sdl2::render::Canvas;
 use sdl2::video::Window;
-use cpu::Cpu;
-use sdl2::rect::Rect;
 
-const SCALE: u32 = 10;
-
+/// Represents the drawn display.
 pub struct Display {
+    /// The canvas.
     canvas: Canvas<Window>,
+
+    /// The scale.
+    scale: u32,
 }
 
 impl Display {
     /// Creates a new display instance
-    pub fn new(sdl_context: &sdl2::Sdl) -> Self {
-        let video_subsystem = sdl_context.video().unwrap();
+    pub fn new(sdl_context: &sdl2::Sdl, scale: u32) -> Self {
+        let video_subsystem = sdl_context.video().expect("No SDL video context found");
 
         let window = video_subsystem
-            .window("Chip8", graphics::WIDTH * SCALE, graphics::HEIGHT * SCALE)
+            .window("Chip8", gpu::WIDTH * scale, gpu::HEIGHT * scale)
             .position_centered()
             .opengl()
             .build()
-            .unwrap();
+            .expect("Failed to build window");
 
-        let mut canvas = window.into_canvas().build().unwrap();
+        let mut canvas = window.into_canvas().build().expect("Failed to build canvas");
         canvas.clear();
         canvas.present();
 
-        Display {
-            canvas,
-        }
+        Display { canvas, scale }
     }
 
     /// Draws the contents of the VRAM onto the canvas.
-    pub fn render(&mut self, cpu: &Cpu) {
-//        info!("{}", cpu.graphics);
-        for x in 0..graphics::WIDTH {
-            for y in 0..graphics::HEIGHT {
-                let bit = cpu.graphics.memory[y as usize * graphics::WIDTH as usize + x as usize];
+    pub fn render(&mut self, graphics: &mut Gpu) {
+        for x in 0..gpu::WIDTH {
+            for y in 0..gpu::HEIGHT {
+                let bit = graphics.memory[y as usize * gpu::WIDTH as usize + x as usize];
                 let color = if bit {
-
                     Color::RGB(0xFF, 0xFF, 0xFF)
                 } else {
                     Color::RGB(0x00, 0x00, 0x00)
                 };
                 self.canvas.set_draw_color(color);
-                self.canvas.fill_rect(Rect::new((x * SCALE) as i32, (y * SCALE) as i32, SCALE, SCALE));
+                self.canvas
+                    .fill_rect(Rect::new(
+                        (x * self.scale) as i32,
+                        (y * self.scale) as i32,
+                        self.scale,
+                        self.scale,
+                    ))
+                    .expect("Failed to draw to canvas");
             }
         }
+        graphics.pending_draw = false;
         self.canvas.present()
     }
 }

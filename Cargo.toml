@@ -1,10 +1,12 @@
 [package]
 name = "chip8"
-version = "0.1.0"
+version = "1.0.0"
 authors = ["Roman Kolacz <roman@kolacz.io>"]
+edition="2018"
 
 [dependencies]
-rand = "0.5"
-sdl2 = "0.31.0"
-log = "0.4"
-env_logger = "0.5.13"
+rand = "0.7.2"
+sdl2 = "0.32.2"
+log = "0.4.8"
+env_logger = "0.7.0"
+clap = "2.33.0"

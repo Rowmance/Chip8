@@ -1,9 +1,16 @@
-extern crate sdl2;
-
-use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
+use std::mem::discriminant;
 
-#[derive(Default, Debug)]
+/// The keymap to use.
+pub enum KeypadSetting {
+    /// DVORAK bindings.
+    DVORAK,
+
+    /// Qwerty Bindings.
+    QWERTY,
+}
+
+/// Represents a keypad.
 pub struct Keypad {
     /// The state of the 16 keys.
     ///
@@ -16,12 +23,16 @@ pub struct Keypad {
     /// ```
     /// The value is true if the key is pressed.
     pub keys: [bool; 16],
+
+    /// The keypad setting
+    pub setting: KeypadSetting,
 }
 
 impl Keypad {
-    pub fn new() -> Self {
+    pub fn new(setting: KeypadSetting) -> Self {
         Keypad {
             keys: [false; 16],
+            setting,
         }
     }
 
@@ -36,37 +47,54 @@ impl Keypad {
         self.keys[key as usize]
     }
 
-    /// Sets the given key index to the given state.
-    pub fn set_key(&mut self, key: u8, state: bool) {
-        self.keys[key as usize] = state;
-    }
-
     /// Maps the given pressed keyboard-key to an index
     pub fn set_from_keycode(&mut self, key: Keycode, state: bool) {
-        match key {
-            Keycode::Num1 => self.keys[0x1 as usize] = state,
-            Keycode::Num2 => self.keys[0x2 as usize] = state,
-            Keycode::Num3 => self.keys[0x3 as usize] = state,
-            Keycode::Num4 => self.keys[0xC as usize] = state,
+        if discriminant(&self.setting) == discriminant(&KeypadSetting::DVORAK) {
+            match key {
+                Keycode::Num1 => self.keys[0x1 as usize] = state,
+                Keycode::Num2 => self.keys[0x2 as usize] = state,
+                Keycode::Num3 => self.keys[0x3 as usize] = state,
+                Keycode::Num4 => self.keys[0xC as usize] = state,
 
-            Keycode::Quote => self.keys[0x4 as usize] = state,
-            Keycode::Comma => self.keys[0x5 as usize] = state,
-            Keycode::Period => self.keys[0x6 as usize] = state,
-            Keycode::P => self.keys[0xD as usize] = state,
+                Keycode::Quote => self.keys[0x4 as usize] = state,
+                Keycode::Comma => self.keys[0x5 as usize] = state,
+                Keycode::Period => self.keys[0x6 as usize] = state,
+                Keycode::P => self.keys[0xD as usize] = state,
 
-            Keycode::A => self.keys[0x7 as usize] = state,
-            Keycode::O => self.keys[0x8 as usize] = state,
-            Keycode::E => self.keys[0x9 as usize] = state,
-            Keycode::U => self.keys[0xE as usize] = state,
+                Keycode::A => self.keys[0x7 as usize] = state,
+                Keycode::O => self.keys[0x8 as usize] = state,
+                Keycode::E => self.keys[0x9 as usize] = state,
+                Keycode::U => self.keys[0xE as usize] = state,
 
-            Keycode::Semicolon => self.keys[0xA as usize] = state,
-            Keycode::Q => self.keys[0x0 as usize] = state,
-            Keycode::J => self.keys[0xB as usize] = state,
-            Keycode::K => self.keys[0xF as usize] = state,
-            _ => ()
+                Keycode::Semicolon => self.keys[0xA as usize] = state,
+                Keycode::Q => self.keys[0x0 as usize] = state,
+                Keycode::J => self.keys[0xB as usize] = state,
+                Keycode::K => self.keys[0xF as usize] = state,
+                _ => (),
+            }
+        } else {
+            match key {
+                Keycode::Num1 => self.keys[0x1 as usize] = state,
+                Keycode::Num2 => self.keys[0x2 as usize] = state,
+                Keycode::Num3 => self.keys[0x3 as usize] = state,
+                Keycode::Num4 => self.keys[0xC as usize] = state,
+
+                Keycode::Q => self.keys[0x4 as usize] = state,
+                Keycode::W => self.keys[0x5 as usize] = state,
+                Keycode::E => self.keys[0x6 as usize] = state,
+                Keycode::R => self.keys[0xD as usize] = state,
+
+                Keycode::A => self.keys[0x7 as usize] = state,
+                Keycode::S => self.keys[0x8 as usize] = state,
+                Keycode::D => self.keys[0x9 as usize] = state,
+                Keycode::F => self.keys[0xE as usize] = state,
+
+                Keycode::Z => self.keys[0xA as usize] = state,
+                Keycode::X => self.keys[0x0 as usize] = state,
+                Keycode::C => self.keys[0xB as usize] = state,
+                Keycode::V => self.keys[0xF as usize] = state,
+                _ => (),
+            }
         }
     }
 }
-
-
-// TODO test these

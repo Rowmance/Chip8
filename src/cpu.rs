@@ -1,6 +1,8 @@
-use graphics::Graphics;
-use keypad::Keypad;
+use crate::gpu::Gpu;
+use crate::keypad::Keypad;
 use rand::prelude::random;
+
+use log::debug;
 
 /// Represents the CPU
 pub struct Cpu {
@@ -10,7 +12,6 @@ pub struct Cpu {
     /// The program counter
     pc: u16,
 
-    // TODO maybe pull this (and the others) out and add u8/u16 indexing
     /// The memory (4KB).
     ///
     /// `0x000` through to `0x200` is reserved. Most programs start at
@@ -36,8 +37,8 @@ pub struct Cpu {
     /// Counts down one on every cycle and plays a sound whilst >0.
     st: u8,
 
-    /// The graphics/video
-    pub graphics: Graphics,
+    /// The GPU
+    pub gpu: Gpu,
 
     /// The keypad
     pub keypad: Keypad,
@@ -45,11 +46,10 @@ pub struct Cpu {
 
 impl Cpu {
     /// Returns a new CPU instance
-    pub fn new() -> Self {
+    pub fn new(gpu: Gpu, keypad: Keypad) -> Self {
+        // fill memory with font set
         let mut initial_memory = [0; 4096];
-        for i in 0..FONT_SET.len() {
-            initial_memory[i] = FONT_SET[i];
-        }
+        initial_memory[..FONT_SET.len()].clone_from_slice(&FONT_SET[..]);
 
         Cpu {
             i: 0,
@@ -61,8 +61,8 @@ impl Cpu {
             sp: 0,
             dt: 0,
             st: 0,
-            keypad: Keypad::new(),
-            graphics: Graphics::new(),
+            keypad,
+            gpu,
         }
     }
 
@@ -70,7 +70,7 @@ impl Cpu {
     pub fn load_rom(&mut self, rom: &[u8]) {
         // ROMs are loaded into memory from 0x200
         for x in 0..rom.len() {
-            info!("loading byte {:X} into {:X}", rom[x], 0x200 + x);
+            debug!("loading byte {:X} into {:X}", rom[x], 0x200 + x);
             self.memory[0x200 + x] = rom[x];
         }
     }
@@ -78,12 +78,16 @@ impl Cpu {
     pub fn execute_cycle(&mut self) {
         // each opcode is two bytes, and so needs to be combined from
         // two successive pc locations
-        let part1 = self.memory[self.pc as usize] as u16;
-        let part2 = self.memory[self.pc as usize + 1] as u16;
+        let part1 = u16::from(self.memory[self.pc as usize]);
+        let part2 = u16::from(self.memory[self.pc as usize + 1]);
         let opcode = (part1 << 8) | part2;
         self.execute_opcode(opcode);
-        if self.dt > 0 { self.dt -= 1 };
-        if self.st > 0 { self.st -= 1 };
+        if self.dt > 0 {
+            self.dt -= 1
+        };
+        if self.st > 0 {
+            self.st -= 1
+        };
     }
 
     // ---------------------------------------------------------
@@ -93,15 +97,15 @@ impl Cpu {
     fn execute_opcode(&mut self, opcode: u16) {
         // split the op-code up to make the matching logic saner
         let nibbles = (
-            (opcode & 0xF000) >> 12 as u8,
-            (opcode & 0x0F00) >> 8 as u8,
-            (opcode & 0x00F0) >> 4 as u8,
-            (opcode & 0x000F) as u8
+            ((opcode & 0xF000) >> 12) as u8,
+            ((opcode & 0x0F00) >> 8) as u8,
+            ((opcode & 0x00F0) >> 4) as u8,
+            (opcode & 0x000F) as u8,
         );
 
-        let x = nibbles.1 as u8;
-        let y = nibbles.2 as u8;
-        let n = nibbles.3 as u8;
+        let x = nibbles.1;
+        let y = nibbles.2;
+        let n = nibbles.3;
         let kk = (opcode & 0x00FF) as u8;
         let addr = (opcode & 0x0FFF) as u16;
 
@@ -132,7 +136,7 @@ impl Cpu {
             (0x0E, _, 0x09, 0x0E) => self.skp(x),
             (0x0E, _, 0x0A, 0x01) => self.sknp(x),
             (0x0F, _, 0x00, 0x07) => self.ld_get_dt(x),
-            (0x0F, _, 0x00, 0x0A) => self.ld_x_kk(x, kk),
+            (0x0F, _, 0x00, 0x0A) => self.ld_key(x),
             (0x0F, _, 0x01, 0x05) => self.ld_set_dt(x),
             (0x0F, _, 0x01, 0x08) => self.ld_set_st(x),
             (0x0F, _, 0x01, 0x0E) => self.add_i_vx(x),
@@ -140,13 +144,13 @@ impl Cpu {
             (0x0F, _, 0x03, 0x03) => self.ld_bcd(x),
             (0x0F, _, 0x05, 0x05) => self.ld_set_memory(x),
             (0x0F, _, 0x06, 0x05) => self.ld_get_memory(x),
-            (_, _, _, _) => self.noop()
+            (_, _, _, _) => self.noop(),
         }
     }
 
     /// Clears the display
     fn cls(&mut self) {
-        self.graphics.clear();
+        self.gpu.clear();
         self.pc += 2;
     }
 
@@ -180,7 +184,11 @@ impl Cpu {
 
     /// Skip the next instruction if Vx == Vy
     fn se_x_y(&mut self, x: u8, y: u8) {
-        self.pc += if self.v[x as usize] == self.v[y as usize] { 4 } else { 2 }
+        self.pc += if self.v[x as usize] == self.v[y as usize] {
+            4
+        } else {
+            2
+        }
     }
 
     /// Set Vx = kk
@@ -191,8 +199,8 @@ impl Cpu {
 
     /// Set Vx = Vx + kk
     fn add_x_kk(&mut self, x: u8, kk: u8) {
-        let vx = self.v[x as usize] as u16;
-        let result = vx + (kk as u16);
+        let vx = u16::from(self.v[x as usize]);
+        let result = vx + u16::from(kk);
         self.v[x as usize] = result as u8;
         self.pc += 2;
     }
@@ -224,8 +232,8 @@ impl Cpu {
     /// Set Vx = Vx + Vy, and set Vf = carry
     /// Only the lowest 8 bits of the result are set to Vx
     fn add_x_y(&mut self, x: u8, y: u8) {
-        let vx = self.v[x as usize] as u16;
-        let vy = self.v[y as usize] as u16;
+        let vx = u16::from(self.v[x as usize]);
+        let vy = u16::from(self.v[y as usize]);
         let result = vx + vy;
         self.v[0xF] = if result > 0xFF { 1 } else { 0 };
         self.v[x as usize] = result as u8;
@@ -235,7 +243,11 @@ impl Cpu {
     /// Set Vx = Vx - Vy, and set Vy = NOT borrow
     /// If Vx > Vy, Vf is set to 1
     fn sub_x_y(&mut self, x: u8, y: u8) {
-        self.v[0xF] = if self.v[x as usize] > self.v[y as usize] { 1 } else { 0 };
+        self.v[0xF] = if self.v[x as usize] > self.v[y as usize] {
+            1
+        } else {
+            0
+        };
         self.v[x as usize] = self.v[x as usize].wrapping_sub(self.v[y as usize]);
         self.pc += 2;
     }
@@ -250,21 +262,29 @@ impl Cpu {
 
     /// Set Vx = Vy - Vx, set Vf = NOT borrow
     fn subn(&mut self, x: u8, y: u8) {
-        self.v[0xF] = if self.v[y as usize] > self.v[x as usize] { 1 } else { 0 };
+        self.v[0xF] = if self.v[y as usize] > self.v[x as usize] {
+            1
+        } else {
+            0
+        };
         self.v[x as usize] = self.v[y as usize].wrapping_sub(self.v[x as usize]);
         self.pc += 2;
     }
 
     /// Set Vx = Vx SHL 1
     fn shl(&mut self, x: u8) {
-        self.v[0xF] = (self.v[x as usize] & 0b10000000) >> 7;
+        self.v[0xF] = (self.v[x as usize] & 0b1000_0000) >> 7;
         self.v[x as usize] <<= 1;
         self.pc += 2;
     }
 
     /// Skip the next instruction if Vx != Vy
     fn sne_x_y(&mut self, x: u8, y: u8) {
-        self.pc += if self.v[x as usize] != self.v[y as usize] { 4 } else { 2 };
+        self.pc += if self.v[x as usize] != self.v[y as usize] {
+            4
+        } else {
+            2
+        };
     }
 
     /// Set I = addr
@@ -275,7 +295,7 @@ impl Cpu {
 
     /// Jump to the location V0 + addr
     fn jp_v0_addr(&mut self, addr: u16) {
-        self.pc = addr + self.v[0] as u16;
+        self.pc = addr + u16::from(self.v[0]);
     }
 
     /// Set Vx = random byte & kk
@@ -293,19 +313,27 @@ impl Cpu {
         let bytes = (0..n as usize)
             .map(|i| self.memory[self.i as usize + i])
             .collect::<Vec<u8>>();
-        let collision = self.graphics.draw(vx, vy, bytes);
+        let collision = self.gpu.draw(vx, vy, bytes);
         self.v[0xF] = if collision { 1 } else { 0 };
         self.pc += 2;
     }
 
     /// Skip the next instruction if the key with the value Vx is pressed.
     fn skp(&mut self, x: u8) {
-        self.pc += if self.keypad.is_key_pressed(self.v[x as usize]) { 4 } else { 2 };
+        self.pc += if self.keypad.is_key_pressed(self.v[x as usize]) {
+            4
+        } else {
+            2
+        };
     }
 
     /// Skip the next instruction if the key with the value Vx is not pressed.
     fn sknp(&mut self, x: u8) {
-        self.pc += if self.keypad.is_key_pressed(self.v[x as usize]) { 2 } else { 4 };
+        self.pc += if self.keypad.is_key_pressed(self.v[x as usize]) {
+            2
+        } else {
+            4
+        };
     }
 
     /// Set Vx = delay timer value
@@ -338,14 +366,14 @@ impl Cpu {
     /// Set I = I + Vx
     /// Set Vf = 1 if the result is greater than 0xFFF
     fn add_i_vx(&mut self, x: u8) {
-        self.i += self.v[x as usize] as u16;
+        self.i += u16::from(self.v[x as usize]);
         self.v[0xF] = if self.i > 0xFFF { 1 } else { 0 };
         self.pc += 2;
     }
 
     /// Set I = location of sprite for digit Vx
     fn ld_sprite(&mut self, x: u8) {
-        self.i = self.v[x as usize] as u16 * 5;
+        self.i = u16::from(self.v[x as usize]) * 5;
         self.pc += 2;
     }
 
@@ -416,5 +444,5 @@ pub const FONT_SET: [u8; 80] = [
     0xF0, 0x80, 0x80, 0x80, 0xF0, // C
     0xE0, 0x90, 0x90, 0x90, 0xE0, // D
     0xF0, 0x80, 0xF0, 0x80, 0xF0, // E
-    0xF0, 0x80, 0xF0, 0x80, 0x80  // F
+    0xF0, 0x80, 0xF0, 0x80, 0x80, // F
 ];
