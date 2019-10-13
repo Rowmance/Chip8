@@ -32,63 +32,63 @@ The help text can be displayed with
 chip8 --help
 ```
 
-### Available ROMs
+## Available ROMs
 
 The controls listed here correspond to the Chip8 keypad. See the Keypad section for details on how it maps to your keyboard.
 
-####`pong`
+###`pong`
 Player vs CPU game of classic Pong. Move up with `1` and down with `4`.
 
-####`bon`
+###`bon`
 Test ROM which tests the conditional jump, mathematical and logical operations ofd the CPU. If all tests are successful, 'BON' is displayed.
 
-####`walk`
+###`walk`
 Demo ROM which randomly walks along the display and inverts pixel values.
 
-####`particle`
+###`particle`
 Demo ROM which shoots random particles from the bottom centre of the display.
 
-####`puzzle`
+###`puzzle`
 Traditional puzzle game where the player aims to reverse the keypad by sliding values into the empty space. To move a tile into the empty space, press the keypad button which corresponds to its current location.
 
-####`space-invaders`
+###`space-invaders`
 Well known arcade game where the aim is to destroy all the aliens which move towards the bottom of the display. Shoot with `5`, move with `4` and `6`. Press `5` to begin a new game.
 
-####`keypad-test`
+###`keypad-test`
 Test ROM which highlights the button which has been pressed on the display.
 
-### Options
+## Options
 The following options are available. All of them are optional and have sensible default values which mimic the original Chip8 implementations.
 
-####`KEYMAP`
+###`KEYMAP`
 Specifies the keypad mapping to use. See the Keypad section below for details on what each option corresponds to.
 
-##### Usage
+#### Usage
 - `-k <KEYMAP>`
 - `--keymap <KEYMAP>`
-##### Possible Values
+#### Possible Values
 - `qwerty` (default)
 - `dvorak`
 
-####`MULTIPLIER`
+###`MULTIPLIER`
 The CPU clock multiplier to use. By default, the CPU runs at 500Hz. A value of `1` will set this. A value of `2` will set it to 1000Hz, and a value of `0.1` will set this to 50Hz.
 
-##### Usage
+#### Usage
 - `-m <MULTIPLIER>`
 - `--multiplier <MULTIPLIER>`
-##### Possible Values
+#### Possible Values
 - Any positive float (default `1.0`)
 
-####`SCALE`
+###`SCALE`
 The scale of the display. Each pixel on the Chip8 display will be represented by a square this many pixels in height/width on your display. The Chip8 display is 64x32 pixels. A value of `10` will mean a 10x10 pixel square represents each pixel on the Chip8 display.
 
-##### Usage
+#### Usage
 - `-s <SCALE>`
 - `--scale <SCALE>`
-##### Possible Values
+#### Possible Values
 - Any positive integer (default `10`)
 
-### Keypad
+## Keypad
 The Chip8 keypad takes the following form:
 ```
  1 2 3 C
